@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_USER = "surendra1docker"
+        IMAGE_NAME = "simple-calculator"
+        IMAGE_TAG = "2.0.${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'master',
+                    url: 'https://github.com/SurendraImmanni/web-calculator.git'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            environment {
+                scannerHome = tool 'sonar-scanner'
+            }
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        $scannerHome/bin/sonar-scanner \
+                        -Dsonar.projectKey=web-calculator \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://15.206.178.216:9000 \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                  docker build -t $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG .
+                '''
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', 
+                                                 usernameVariable: 'DOCKERHUB_USER', 
+                                                 passwordVariable: 'DOCKERHUB_PASS')]) {
+                    sh '''
+                      echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+                      docker push $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                  kubectl cluster-info
+                  kubectl set image deployment/simple-calculator simple-calculator=$DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG --record || \
+                  kubectl apply -f k8s-deployment.yaml
+                  kubectl rollout status deployment/simple-calculator
+                '''
+            }
+        }
+    }
+}
