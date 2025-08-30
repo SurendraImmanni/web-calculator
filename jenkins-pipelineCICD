@@ -25,7 +25,7 @@ pipeline {
                         $scannerHome/bin/sonar-scanner \
                         -Dsonar.projectKey=web-calculator \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=http://15.206.178.216:9000 \
+                        -Dsonar.host.url=http://13.235.3.62:9000 \
                         -Dsonar.login=$SONAR_AUTH_TOKEN
                     '''
                 }
