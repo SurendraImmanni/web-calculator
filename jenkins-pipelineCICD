@@ -64,7 +64,8 @@ pipeline {
 
                   # Update the deployment image OR create if not exists
                   kubectl set image deployment/simple-calculator simple-calculator=$DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG --record || \
-                  kubectl apply -f k8s-deployment.yaml
+                  kubectl apply -f deployment.yml
+                  kubectl apply -f srvc.yml
 
                   # Check rollout status
                   kubectl rollout status deployment/simple-calculator
