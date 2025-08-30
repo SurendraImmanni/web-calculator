@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'docker-agent' } // node with docker installed
+    agent any
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')   // Jenkins credentials for DockerHub
