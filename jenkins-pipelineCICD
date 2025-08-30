@@ -1,6 +1,5 @@
 pipeline {
     agent { label 'docker-agent' } // node with docker installed
-    ...
 }
 
     environment {
