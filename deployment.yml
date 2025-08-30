@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: simple-calculator
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: simple-calculator
@@ -16,6 +16,6 @@ spec:
       - name: simple-calculator
         image: your-dockerhub-username/simple-calculator:v1
         ports:
-        - containerPort: 5000
+        - containerPort: 5050
 ---
 
